@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\URL;
+use PragmaRX\Google2FA\Google2FA;
+use Illuminate\Support\Facades\Session;
+
 
 class AuthController extends Controller
 {
@@ -27,17 +30,34 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('correo', 'contraseña');
+        try {
+            $credentials = $request->only('correo', 'contraseña');
+            
+            $user = User::where('correo', $credentials['correo'])->first();
+            
+            if (!$user || !Hash::check($credentials['contraseña'], $user->contraseña)) {
+                return response()->json(['error' => 'Verifica tus credencialess'], 401);
+            }
     
-        $user = User::where('correo', $credentials['correo'])->first();
+            if ($user->isAdmin()) {
+                $google2fa = app(Google2FA::class);
+            
+                if (!$request->google2fa_code) {
+                    return response()->json(['error' => 'Código de autenticación en dos pasos requerido'], 401);
+                }
+            
+                if (!$google2fa->verifyKey($user->google2fa_secret, $request->input('google2fa_code'))) {
+                    return response()->json(['error' => 'Código de autenticación en dos pasos incorrecto'], 401);
+                }
+            }
+            
+            $token = JWTAuth::fromUser($user);
+            return $this->respondWithToken($token);
     
-        if (!$user || !Hash::check($credentials['contraseña'], $user->contraseña)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ha ocurrido un error. Por favor, inténtalo de nuevo.'], 500);
         }
-    
-        $token = JWTAuth::fromUser($user);
-        return $this->respondWithToken($token);
-    }    
+    }       
     
     protected function respondWithToken($token)
     {
@@ -87,7 +107,21 @@ class AuthController extends Controller
                 'role' => $role,
             ]);
 
-            return response()->json(['message' => 'Usuario registrado correctamente']);
+            if ($user->isAdmin()) {
+                $google2fa = app(Google2FA::class);
+                $user->google2fa_secret = $google2fa->generateSecretKey();
+                $user->save();
+    
+                $qrCodeUrl = $google2fa->getQRCodeUrl(
+                    config('app.name'),
+                    $user->correo,
+                    $user->google2fa_secret
+                );
+    
+                //return view('2fa', ['qrCodeUrl' => $qrCodeUrl]);
+            }
+
+            return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $user->google2fa_secret,]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
