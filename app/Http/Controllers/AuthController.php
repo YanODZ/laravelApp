@@ -109,13 +109,6 @@ class AuthController extends Controller
                 $google2fa = app(Google2FA::class);
                 $user->google2fa_secret = $google2fa->generateSecretKey();
                 $user->save();
-    
-                $qrCodeUrl = $google2fa->getQRCodeUrl(
-                    config('app.name'),
-                    $user->correo,
-                    $user->google2fa_secret
-                );
-    
             }
 
             return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $user->google2fa_secret,]);

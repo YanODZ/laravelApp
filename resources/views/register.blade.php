@@ -95,7 +95,7 @@
     </div>
 </div>
 <!-- Reemplaza la versión slim con la versión completa de jQuery -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="{{ asset('js/jquery.min.js') }}"></script>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
