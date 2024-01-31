@@ -19,13 +19,15 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        $urlFirmada = URL::temporarySignedRoute('login', now()->addMinutes(30));
-        return view('login', ['urlFirmada' => $urlFirmada]);
+        //$urlFirmada = URL::temporarySignedRoute('login', now()->addMinutes(30));
+        //return view('login', ['urlFirmada' => $urlFirmada]);
+        return view('login');
     }
 
     public function showRegisterForm(){
-        $urlFirmada = URL::temporarySignedRoute('register', now()->addMinutes(30));
-        return view('register', ['urlFirmada' => $urlFirmada]);
+        //$urlFirmada = URL::temporarySignedRoute('register', now()->addMinutes(30));
+        //return view('register', ['urlFirmada' => $urlFirmada]);
+        return view('register');
     }
 
     public function login(Request $request)

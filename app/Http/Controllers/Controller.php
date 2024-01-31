@@ -14,9 +14,9 @@ class Controller extends BaseController
     {
         if (Auth::check()) {
             $token = $request->input('token');
-            $urlFirmada = URL::temporarySignedRoute('welcome', now()->addMinutes(30));
-            return view('welcome', ['urlFirmada' => $urlFirmada, 'token' => $token]);
-            //return view('welcome', ['token' => $token]);
+            //$surlFirmada = URL::temporarySignedRoute('welcome', now()->addMinutes(30));
+            //return view('welcome', ['urlFirmada' => $urlFirmada, 'token' => $token]);
+            return view('welcome', ['token' => $token]);
         } else {
             return redirect()->route('login');
         }

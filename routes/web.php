@@ -14,7 +14,7 @@ use App\Http\Controllers\Controller;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::middleware('jwt')->group(function () {
+Route::middleware('signed','jwt')->group(function () {
     Route::get('/welcome', [Controller::class, 'showWelcome'])->name('welcome');
 });
 
@@ -25,8 +25,14 @@ Route::get('/', function () {
 
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::middleware(['signed'])->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+});
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
+
+Route::get('/error/invalid-signature', function () {
+    return 'Error: La firma no es válida';
+})->name('error.invalid_signature');
