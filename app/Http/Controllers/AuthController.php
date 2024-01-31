@@ -19,14 +19,10 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        //$urlFirmada = URL::temporarySignedRoute('login', now()->addMinutes(30));
-        //return view('login', ['urlFirmada' => $urlFirmada]);
         return view('login');
     }
 
     public function showRegisterForm(){
-        //$urlFirmada = URL::temporarySignedRoute('register', now()->addMinutes(30));
-        //return view('register', ['urlFirmada' => $urlFirmada]);
         return view('register');
     }
 
@@ -120,12 +116,11 @@ class AuthController extends Controller
                     $user->google2fa_secret
                 );
     
-                //return view('2fa', ['qrCodeUrl' => $qrCodeUrl]);
             }
 
             return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $user->google2fa_secret,]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json(['error' => 'Algo salió mal con el registro, contacta con la administración'], 400);
         }
     }
 }
