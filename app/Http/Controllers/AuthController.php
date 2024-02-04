@@ -34,18 +34,18 @@ class AuthController extends Controller
             $user = User::where('correo', $credentials['correo'])->first();
             
             if (!$user || !Hash::check($credentials['contraseña'], $user->contraseña)) {
-                return response()->json(['error' => 'Verifica tus credencialess'], 401);
+                return response()->json(['auth' => 'Verifica tus credencialess']);
             }
     
             if ($user->isAdmin()) {
                 $google2fa = app(Google2FA::class);
             
                 if (!$request->google2fa_code) {
-                    return response()->json(['error' => 'Código de autenticación en dos pasos requerido'], 401);
+                    return response()->json(['auth' => 'Código de autenticación en dos pasos requerido']);
                 }
             
                 if (!$google2fa->verifyKey($user->google2fa_secret, $request->input('google2fa_code'))) {
-                    return response()->json(['error' => 'Código de autenticación en dos pasos incorrecto'], 401);
+                    return response()->json(['auth' => 'Código de autenticación en dos pasos incorrecto']);
                 }
             }
             
@@ -53,7 +53,7 @@ class AuthController extends Controller
             return $this->respondWithToken($token);
     
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Ha ocurrido un error. Por favor, inténtalo de nuevo.'], 500);
+            return response()->json(['auth' => 'Ha ocurrido un error. Por favor, inténtalo de nuevo.']);
         }
     }       
     
@@ -93,7 +93,7 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
-                throw new \Exception('Error de validación: ' . implode(' ', $validator->errors()->all()));
+                return response()->json(['auth' => implode(' ', $validator->errors()->all())]);
             }
 
             $role = User::count() === 0 ? 'admin' : 'user';
@@ -113,7 +113,7 @@ class AuthController extends Controller
 
             return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $user->google2fa_secret,]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Algo salió mal con el registro, contacta con la administración'], 400);
+            return response()->json(['auth' => 'Algo salió mal con el registro, contacta con la administración']);
         }
     }
 }

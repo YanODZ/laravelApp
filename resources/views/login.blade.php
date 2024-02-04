@@ -107,14 +107,16 @@
                 data: $(this).serialize(),
                 success: function (response) {
                     var token = response.access_token;
-                    if (token) {
-                        alert('Login exitoso!');
-                        window.location.href = '/welcome?token=' + token;
+                    if (response.auth) {
+                        alert(response.auth);
+                    } else {
+                        var token = response.access_token;
+                        if (token) {
+                            alert('Login exitoso!');
+                            window.location.href = '/welcome?token=' + token;
+                        }
                     }
                 },
-                error: function (xhr, status, error) {
-                    alert(JSON.parse(xhr.responseText).error);
-                }
             });
         }else{
             alert('Verifica el captcha!');

@@ -111,15 +111,16 @@
                     url: $(this).attr('action'),
                     data: $(this).serialize(),
                     success: function (response) {
-                        alert(response.message);
-                        if(response.factor !=null){
-                            alert('Añade este código a tu App para poder iniciar sesión!\n' + response.factor);
+                        if(response.auth){
+                            alert(response.auth);
+                        }else{
+                            alert(response.message);
+                            if(response.factor !=null){
+                                alert('Añade este código a tu App para poder iniciar sesión!\n' + response.factor);
+                            }
+                            window.location.href = "{{ route('login') }}";
                         }
-                        window.location.href = "{{ route('login') }}";
                     },
-                    error: function (xhr, status, error) {
-                        alert(JSON.parse(xhr.responseText).error);
-                    }
                 });
             }else{
                 alert('Verifica el captcha!');
