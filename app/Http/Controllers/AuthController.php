@@ -13,6 +13,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\URL;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 
 
 class AuthController extends Controller
@@ -34,6 +35,7 @@ class AuthController extends Controller
             $user = User::where('correo', $credentials['correo'])->first();
             
             if (!$user || !Hash::check($credentials['contraseña'], $user->contraseña)) {
+                Log::info('Intento de sesión no válido: ' . $request->correo . ' IP:' . $request->getClientIp());
                 return response()->json(['auth' => 'Verifica tus credencialess']);
             }
     
@@ -41,18 +43,22 @@ class AuthController extends Controller
                 $google2fa = app(Google2FA::class);
             
                 if (!$request->google2fa_code) {
+                    Log::info('Intento de sesión sin código: ' . $user->correo . ' IP:' . $request->getClientIp());
                     return response()->json(['auth' => 'Código de autenticación en dos pasos requerido']);
                 }
             
                 if (!$google2fa->verifyKey($user->google2fa_secret, $request->input('google2fa_code'))) {
+                    Log::info('Intento de sesión con código: ' . $user->correo . ' IP:' . $request->getClientIp());
                     return response()->json(['auth' => 'Código de autenticación en dos pasos incorrecto']);
                 }
             }
             
             $token = JWTAuth::fromUser($user);
+            Log::info('Usuario ha iniciado sesión: ' . $user->correo . ' IP:' . $request->getClientIp());
             return $this->respondWithToken($token);
     
         } catch (\Exception $e) {
+            Log::info('Error al iniciar sesión: IP:' . $request->getClientIp());
             return response()->json(['auth' => 'Ha ocurrido un error. Por favor, inténtalo de nuevo.']);
         }
     }       
@@ -66,14 +72,16 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         try {
             $token = JWTAuth::getToken();
+            $user = JWTAuth::setToken($token)->authenticate();
+            Log::info('Usuario ha cerrado sesión:' . $user->correo . ' IP:' . $request->getClientIp());
             JWTAuth::parseToken()->invalidate();
-    
-            return redirect()->route('login')->with('message', 'Sesión cerrada correctamente')->with('token', $token);
+            return redirect()->route('login')->with('message', 'Sesión cerrada correctamente');
         } catch (\Exception $e) {
+            Log::info('Error al cerrar sesión: IP:' . $request->getClientIp());
             return response()->json(['error' => 'Error al cerrar sesión'], 500);
         }
     }
@@ -93,6 +101,7 @@ class AuthController extends Controller
             ]);
 
             if ($validator->fails()) {
+                Log::info('Intento de registro:' . $request->correo . ' ' . implode(' ', $validator->errors()->all()) . ' IP:' . $request->getClientIp());
                 return response()->json(['auth' => implode(' ', $validator->errors()->all())]);
             }
 
@@ -110,9 +119,10 @@ class AuthController extends Controller
                 $user->google2fa_secret = $google2fa->generateSecretKey();
                 $user->save();
             }
-
+            Log::info('Usuario registrado:' . $user->correo . ' IP:' . $request->getClientIp());
             return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $user->google2fa_secret,]);
         } catch (\Exception $e) {
+            Log::info('Error al registrar: IP:' . $request->getClientIp());
             return response()->json(['auth' => 'Algo salió mal con el registro, contacta con la administración']);
         }
     }

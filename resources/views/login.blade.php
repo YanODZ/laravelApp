@@ -66,7 +66,7 @@
 
                         <div class="form-group row mb-0">
                             <div class="col-md-8 offset-md-4">
-                            <div class="g-recaptcha" name="captchaInput" data-sitekey="6LcehVspAAAAALZ6f5Qzq_K4wAZmbdeKz4zwY_9w"></div>
+                            <div class="g-recaptcha" name="captchaInput" data-sitekey="{{ env('APP_RECAPTCHA_SITE_KEY') }}"></div>
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('Login') }}
                                 </button>
