@@ -21,11 +21,11 @@ class JwtMiddleware
             $user = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return redirect()->route('login');
+                return redirect()->route('/');
             } elseif ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return redirect()->route('login');
+                return redirect()->route('/');
             } else {
-                return redirect()->route('login');
+                return redirect()->route('/');
             }
         }
         return $next($request);

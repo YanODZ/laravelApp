@@ -16,7 +16,7 @@ class SignedRouteMiddleware
     public function handle($request, Closure $next)
     {
         $route = $request->route();
-        $signature = $request->query('firma');
+        $signature = $request->query('signed');
         if (!$signature) {
             $signature = $this->generateSignature($route->getName());
             return redirect()->to($this->addSignatureToUrl($request->fullUrl(), $signature));
@@ -42,6 +42,6 @@ class SignedRouteMiddleware
 
     private function addSignatureToUrl($url, $signature)
     {
-        return $url . (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . 'firma=' . $signature;
+        return $url . (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . 'signed=' . $signature;
     }
 }

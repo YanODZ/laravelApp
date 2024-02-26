@@ -106,14 +106,12 @@
                 url: $(this).attr('action'),
                 data: $(this).serialize(),
                 success: function (response) {
-                    var token = response.access_token;
                     if (response.auth) {
                         alert(response.auth);
                     } else {
-                        var token = response.access_token;
-                        if (token) {
+                        if (response.access) {
                             alert('Login exitoso!');
-                            window.location.href = '/welcome?token=' + token;
+                            window.location.href = response.access;
                         }
                     }
                 },

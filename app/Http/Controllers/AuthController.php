@@ -30,6 +30,16 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'correo' => 'required',
+                'g-recaptcha-response' => 'required',
+                'contraseña' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])/',
+                ],
+            ]);
             $credentials = $request->only('correo', 'contraseña');
             
             $user = User::where('correo', $credentials['correo'])->first();
@@ -66,7 +76,7 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
-            'access_token' => $token,
+            'access' => 'welcome?token=' . $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
         ]);
@@ -92,6 +102,7 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|string|max:60|unique:users',
                 'correo' => 'required|string|email|max:60|unique:users',
+                'g-recaptcha-response' => 'required',
                 'contraseña' => [
                     'required',
                     'string',
