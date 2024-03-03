@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\URL;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -56,8 +56,9 @@ class AuthController extends Controller
                     Log::info('Intento de sesión sin código: ' . $user->correo . ' IP:' . $request->getClientIp());
                     return response()->json(['auth' => 'Código de autenticación en dos pasos requerido']);
                 }
-            
-                if (!$google2fa->verifyKey($user->google2fa_secret, $request->input('google2fa_code'))) {
+                $encryptedSecret = $user->google2fa_secret;
+                $decryptedSecret = Crypt::decryptString($encryptedSecret);
+                if (!$google2fa->verifyKey($decryptedSecret, $request->input('google2fa_code'))) {
                     Log::info('Intento de sesión con código: ' . $user->correo . ' IP:' . $request->getClientIp());
                     return response()->json(['auth' => 'Código de autenticación en dos pasos incorrecto']);
                 }
@@ -124,14 +125,16 @@ class AuthController extends Controller
                 'contraseña' => Hash::make($request->input('contraseña')),
                 'role' => $role,
             ]);
-
+            $secret = null;
             if ($user->isAdmin()) {
                 $google2fa = app(Google2FA::class);
-                $user->google2fa_secret = $google2fa->generateSecretKey();
+                $secret = $google2fa->generateSecretKey();
+                $encryptedSecret = Crypt::encryptString($secret);
+                $user->google2fa_secret = $encryptedSecret;
                 $user->save();
             }
             Log::info('Usuario registrado:' . $user->correo . ' IP:' . $request->getClientIp());
-            return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $user->google2fa_secret,]);
+            return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $secret,]);
         } catch (\Exception $e) {
             Log::info('Error al registrar: IP:' . $request->getClientIp());
             return response()->json(['auth' => 'Algo salió mal con el registro, contacta con la administración']);
