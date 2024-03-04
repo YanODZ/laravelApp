@@ -25,10 +25,10 @@ Route::get('/', function () {
 
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware(['signed'])->group(function () {
+//Route::middleware(['signed'])->group(function () {
     Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-});
+//});
 
 Route::post('/', [AuthController::class, 'login']);
 

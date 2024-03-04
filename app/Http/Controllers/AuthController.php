@@ -40,13 +40,19 @@ class AuthController extends Controller
                     'regex:/^(?=.*[a-z])(?=.*[A-Z])/',
                 ],
             ]);
+
+            if ($validator->fails()) {
+                Log::info('Intento de login:' . $request->correo . ' ' . implode(' ', $validator->errors()->all()) . ' IP:' . $request->getClientIp());
+                return redirect()->route('login')->with(['auth' => implode(' ', $validator->errors()->all())]);
+            }
+
             $credentials = $request->only('correo', 'contraseña');
             
             $user = User::where('correo', $credentials['correo'])->first();
             
             if (!$user || !Hash::check($credentials['contraseña'], $user->contraseña)) {
                 Log::info('Intento de sesión no válido: ' . $request->correo . ' IP:' . $request->getClientIp());
-                return response()->json(['auth' => 'Verifica tus credencialess']);
+                return redirect()->route('login')->with(['auth' => 'Verifica tus credencialess']);
             }
     
             if ($user->isAdmin()) {
@@ -54,13 +60,13 @@ class AuthController extends Controller
             
                 if (!$request->google2fa_code) {
                     Log::info('Intento de sesión sin código: ' . $user->correo . ' IP:' . $request->getClientIp());
-                    return response()->json(['auth' => 'Código de autenticación en dos pasos requerido']);
+                    return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos requerido']);
                 }
                 $encryptedSecret = $user->google2fa_secret;
                 $decryptedSecret = Crypt::decryptString($encryptedSecret);
                 if (!$google2fa->verifyKey($decryptedSecret, $request->input('google2fa_code'))) {
                     Log::info('Intento de sesión con código: ' . $user->correo . ' IP:' . $request->getClientIp());
-                    return response()->json(['auth' => 'Código de autenticación en dos pasos incorrecto']);
+                    return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos incorrecto']);
                 }
             }
             
@@ -70,17 +76,13 @@ class AuthController extends Controller
     
         } catch (\Exception $e) {
             Log::info('Error al iniciar sesión: IP:' . $request->getClientIp());
-            return response()->json(['auth' => 'Ha ocurrido un error. Por favor, inténtalo de nuevo.']);
+            return redirect()->route('login')->with(['auth' => 'Ha ocurrido un error. Por favor, inténtalo de nuevo.']);
         }
     }       
     
     protected function respondWithToken($token)
     {
-        return response()->json([
-            'access' => 'welcome?token=' . $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
-        ]);
+        return redirect()->route('welcome', ['token' => $token]);
     }
 
     public function logout(Request $request)
@@ -114,7 +116,7 @@ class AuthController extends Controller
 
             if ($validator->fails()) {
                 Log::info('Intento de registro:' . $request->correo . ' ' . implode(' ', $validator->errors()->all()) . ' IP:' . $request->getClientIp());
-                return response()->json(['auth' => implode(' ', $validator->errors()->all())]);
+                return redirect()->route('register')->with(['auth' => implode(' ', $validator->errors()->all())]);
             }
 
             $role = User::count() === 0 ? 'admin' : 'user';
@@ -134,10 +136,10 @@ class AuthController extends Controller
                 $user->save();
             }
             Log::info('Usuario registrado:' . $user->correo . ' IP:' . $request->getClientIp());
-            return response()->json(['message' => 'Usuario registrado correctamente', 'factor' => $secret,]);
+            return redirect()->route('register')->with(['message' => 'Usuario registrado correctamente', 'factor' => $secret,]);
         } catch (\Exception $e) {
             Log::info('Error al registrar: IP:' . $request->getClientIp());
-            return response()->json(['auth' => 'Algo salió mal con el registro, contacta con la administración']);
+            return redirect()->route('register')->with(['auth' => 'Algo salió mal con el registro, contacta con la administración']);
         }
     }
 }

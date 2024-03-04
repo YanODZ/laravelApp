@@ -87,7 +87,25 @@
                                 </a>
                             </div>
                         </div>
-
+                        <div class="form-group row mb-0">
+                            <div class="col-md-8 offset-md-2">
+                                @if(session('message'))
+                                <div class="alert alert-success">
+                                    {{ session('message') }}
+                                </div>
+                                @endif
+                                @if(session('auth'))
+                                    <div class="alert alert-danger">
+                                        {{ session('auth') }}
+                                    </div>
+                                @endif
+                                @if(session('factor'))
+                                    <div class="alert alert-info">
+                                        Usa este código en tu App para iniciar sesión: {{ session('factor') }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -100,7 +118,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
 <!-- Handle form submission with AJAX -->
-<script>
+<!-- <script>
     $(document).ready(function () {
         $('#registerForm').submit(function (e) {
             e.preventDefault();
@@ -127,6 +145,6 @@
             }
         });
     });
-</script>
+</script> -->
 </body>
 </html>
