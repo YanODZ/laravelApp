@@ -95,7 +95,7 @@ class AuthController extends Controller
             return redirect()->route('login')->with('message', 'Sesión cerrada correctamente');
         } catch (\Exception $e) {
             Log::info('Error al cerrar sesión: IP:' . $request->getClientIp());
-            return response()->json(['error' => 'Error al cerrar sesión'], 500);
+            return redirect()->route('login')->with(['auth' => 'Error al cerrar sesión'], 500);
         }
     }
 
