@@ -109,34 +109,5 @@
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<!-- <script>
-    $(document).ready(function () {
-    $('#loginForm').submit(function (e) {
-        e.preventDefault();
-        var captchaValue = $('#g-recaptcha-response').val();
-        if(captchaValue != ''){
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                success: function (response) {
-                    if (response.auth) {
-                        alert(response.auth);
-                    } else {
-                        if (response.access) {
-                            alert('Login exitoso!');
-                            window.location.href = response.access;
-                        }
-                    }
-                },
-            });
-        }else{
-            alert('Verifica el captcha!');
-        }
-    });
-});
-
-</script> -->
-
 </body>
 </html>

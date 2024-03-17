@@ -116,35 +116,5 @@
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-<!-- Handle form submission with AJAX -->
-<!-- <script>
-    $(document).ready(function () {
-        $('#registerForm').submit(function (e) {
-            e.preventDefault();
-            var captchaValue = $('#g-recaptcha-response').val();
-            if(captchaValue != ''){
-                $.ajax({
-                    type: 'POST',
-                    url: $(this).attr('action'),
-                    data: $(this).serialize(),
-                    success: function (response) {
-                        if(response.auth){
-                            alert(response.auth);
-                        }else{
-                            alert(response.message);
-                            if(response.factor !=null){
-                                alert('Añade este código a tu App para poder iniciar sesión!\n' + response.factor);
-                            }
-                            window.location.href = "{{ route('login') }}";
-                        }
-                    },
-                });
-            }else{
-                alert('Verifica el captcha!');
-            }
-        });
-    });
-</script> -->
 </body>
 </html>
