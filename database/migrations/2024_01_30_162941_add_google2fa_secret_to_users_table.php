@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('google2fa_secret')->nullable();
+            $table->string('code')->nullable()->unique();
+            $table->boolean('code_used')->default(false);
         });
     }
 

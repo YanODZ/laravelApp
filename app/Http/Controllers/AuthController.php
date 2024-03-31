@@ -56,18 +56,21 @@ class AuthController extends Controller
             }
     
             if ($user->isAdmin()) {
-                $google2fa = app(Google2FA::class);
-            
                 if (!$request->google2fa_code) {
                     Log::info('Intento de sesión sin código: ' . $user->correo . ' IP:' . $request->getClientIp());
                     return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos requerido']);
                 }
-                $encryptedSecret = $user->google2fa_secret;
+                $encryptedSecret = $user->code;
                 $decryptedSecret = Crypt::decryptString($encryptedSecret);
-                if (!$google2fa->verifyKey($decryptedSecret, $request->input('google2fa_code'))) {
+                if ($decryptedSecret != $request->input('google2fa_code') || $user->code_used == 1) {
                     Log::info('Intento de sesión con código: ' . $user->correo . ' IP:' . $request->getClientIp());
-                    return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos incorrecto']);
+                    return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos incorrecto o usado ']);
                 }
+            }
+
+            if($user->isAdmin()){
+                $user->code_used = true;
+                $user->save();
             }
             
             $token = JWTAuth::fromUser($user);
@@ -140,6 +143,50 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             Log::info('Error al registrar: IP:' . $request->getClientIp());
             return redirect()->route('register')->with(['auth' => 'Algo salió mal con el registro, contacta con la administración']);
+        }
+    }
+
+    public function generateCode(Request $request)
+    {
+        try {
+            // Validar la solicitud
+            $validator = Validator::make($request->all(), [
+                'correo' => 'required|email',
+                'google2fa_secret' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()->first()], 400);
+            }
+
+            // Obtener el usuario
+            $user = User::where('correo', $request->input('correo'))->first();
+            if (!$user) {
+                return response()->json(['error' => 'Usuario no encontrado'], 404);
+            }
+
+            // Verificar el secreto de Google 2FA
+            $google2fa = app(Google2FA::class);
+            $encryptedSecret = $user->google2fa_secret;
+            $decryptedSecret = Crypt::decryptString($encryptedSecret);
+            if ($decryptedSecret !== $request->input('google2fa_secret')) {
+                return response()->json(['error' => 'Código incorrecto'], 400);
+            }
+
+            // Generar un nuevo código
+            $code = mt_rand(100000, 999999);
+
+            $encryptedCode = Crypt::encryptString($code);
+
+            // Guardar el código en la base de datos
+            $user->code = $encryptedCode;
+            $user->code_used = false;
+            $user->save();
+
+            return response()->json(['codigoApp' => $code], 200);
+        } catch (\Exception $e) {
+            Log::error('Error al generar el código: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al generar el código'], 500);
         }
     }
 }
