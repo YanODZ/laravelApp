@@ -70,5 +70,6 @@ class Kernel extends HttpKernel
         'checkRole' => \App\Http\Middleware\CheckRole::class,
         'checkRoleAdmin' => \App\Http\Middleware\checkRoleAdmin::class,
         'ipRestriction' => \App\Http\Middleware\IpRestrictionMiddleware::class,
+        'ipMovilRestriction' => \App\Http\Middleware\IpRestrictionMovilMiddleware::class,
     ];
 }

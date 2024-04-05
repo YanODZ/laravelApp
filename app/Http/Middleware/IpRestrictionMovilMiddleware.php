@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 
-class IpRestrictionMiddleware
+class IpRestrictionMovilMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,7 +16,7 @@ class IpRestrictionMiddleware
     public function handle($request, Closure $next)
     {
         // Lista de direcciones IP permitidas
-        $allowed_ips = explode(',', env('ADMIN_ALLOWED_IPS'));
+        $allowed_ips = explode(',', env('APPMOVIL_ALLOWED_IPS'));
 
         // Obtiene la dirección IP del cliente
         $client_ip = $request->ip();

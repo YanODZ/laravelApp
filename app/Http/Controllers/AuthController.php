@@ -56,6 +56,12 @@ class AuthController extends Controller
             }
     
             if ($user->isAdmin()) {
+                $allowedIPs = explode(',', env('ADMIN_ALLOWED_IPS'));
+                $clientIP = $request->getClientIp();
+                if (!in_array($clientIP, $allowedIPs)) {
+                    Log::info('Intento de sesión de administrador desde una IP no autorizada: ' . $user->correo . ' IP:' . $clientIP);
+                    return redirect()->route('login')->with(['auth' => 'Acceso no autorizado desde esta dirección IP']);
+                }
                 if (!$request->google2fa_code) {
                     Log::info('Intento de sesión sin código: ' . $user->correo . ' IP:' . $request->getClientIp());
                     return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos requerido']);

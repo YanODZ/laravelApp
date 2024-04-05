@@ -4,4 +4,4 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
-Route::post('/generate-code', [AuthController::class, 'generateCode']);
+Route::post('/generate-code', [AuthController::class, 'generateCode'])->middleware('ipMovilRestriction');
