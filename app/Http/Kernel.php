@@ -68,7 +68,7 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'jwt' => \App\Http\Middleware\JwtMiddleware::class,
         'checkRole' => \App\Http\Middleware\CheckRole::class,
-        'checkRoleAdmin' => \App\Http\Middleware\checkRoleAdmin::class,
+        'checkRoleAdmin' => \App\Http\Middleware\CheckRoleAdmin::class,
         'ipRestriction' => \App\Http\Middleware\IpRestrictionMiddleware::class,
         'ipMovilRestriction' => \App\Http\Middleware\IpRestrictionMovilMiddleware::class,
     ];
