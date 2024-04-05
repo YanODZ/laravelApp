@@ -12,11 +12,25 @@ class Controller extends BaseController
 {
     public function showWelcome(Request $request)
     {
-        if (Auth::check()) {
-            $token = $request->input('token');
-            return view('welcome', ['token' => $token]);
+        if ($request->hasValidSignature()) {
+            if (Auth::check()) {
+                $token = $request->input('token');
+                $rol = $request->input('rol');
+                return view('welcome', ['token' => $token, 'rol'=>$rol]);
+            } else {
+                return redirect()->route('login');
+            }
         } else {
-            return redirect()->route('login');
+            abort(403, 'Firma no válida');
         }
+    }
+
+    protected function goToWelcome(Request $request)
+    {
+        $rol = $request->input('rol');
+        $token = $request->input('token');
+        $expiracion = now()->addMinutes(10);
+        $urlFirmada = URL::temporarySignedRoute('welcome', $expiracion, ['token' => $token, 'rol'=>$rol]);
+        return redirect()->to($urlFirmada);
     }
 }

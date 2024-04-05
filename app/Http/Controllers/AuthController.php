@@ -75,7 +75,7 @@ class AuthController extends Controller
             
             $token = JWTAuth::fromUser($user);
             Log::info('Usuario ha iniciado sesión: ' . $user->correo . ' IP:' . $request->getClientIp());
-            return $this->respondWithToken($token);
+            return $this->respondWithToken($token, $user->role);
     
         } catch (\Exception $e) {
             Log::info('Error al iniciar sesión: IP:' . $request->getClientIp());
@@ -83,9 +83,11 @@ class AuthController extends Controller
         }
     }       
     
-    protected function respondWithToken($token)
+    protected function respondWithToken($token, $rol)
     {
-        return redirect()->route('welcome', ['token' => $token]);
+        $expiracion = now()->addMinutes(10);
+        $urlFirmada = URL::temporarySignedRoute('welcome', $expiracion, ['token' => $token, 'rol' => $rol]);
+        return redirect()->to($urlFirmada);
     }
 
     public function logout(Request $request)

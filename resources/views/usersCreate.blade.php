@@ -9,6 +9,7 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 
         <!-- Styles -->
         <style>
@@ -29,7 +30,9 @@
                     @endauth
                 </div>
             @endif
-
+            <div class="sm:fixed sm:top-0 sm:left-0 p-6 text-right z-10">
+                <a href="{{ route('usuariosSigned') }}?token={{ $token }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Regresar a usuarios</a>
+            </div>
             <div class="max-w-7xl mx-auto p-6 lg:p-8">
                 <div class="flex justify-center">
                     <svg viewBox="0 0 62 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-16 w-auto bg-gray-100 dark:bg-gray-900">
@@ -39,47 +42,52 @@
 
                 <div class="mt-16">
                     <div class="grid grid-cols-1 md:grid-cols-6 gap-6 lg:gap-8">
-                    <div class="flex flex-col md:flex-row sm:flex-row gap-4">
-                        <a href="{{ route('productosSigned') }}?token={{ $token }}" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                    </svg>
-                                </div>
-
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Productos</h2>
-
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    En este apartado podrás ver los productos
-                                </p>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-10 offset-md-1">
+                                <b><h1 style="color:white;">Crear usuario</h1></b>
+                                <form style="color:white" action="{{ route('usuarios.store') }}?token={{ $token }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="nombre">Nombre</label>
+                                            <input type="text" class="form-control @error('nombre') is-invalid @enderror" id="nombre" name="nombre" value="{{ old('nombre') }}" required>
+                                            @error('nombre')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="correo">correo</label>
+                                            <input type="email" class="form-control @error('correo') is-invalid @enderror" id="correo" name="correo" value="{{ old('correo') }}" maxlength="60" autocomplete="correo" onpaste="return false;" required>
+                                            @error('correo')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="contraseña">Contraseña</label>
+                                            <input type="password" class="form-control @error('contraseña') is-invalid @enderror" id="contraseña" name="contraseña" value="{{ old('contraseña') }}" maxlength="60" autocomplete="current-password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="La contraseña debe contener al menos un número, una letra minúscula, una letra mayúscula y tener al menos 8 caracteres de longitud." onpaste="return false;" required>
+                                            @error('contraseña')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="role">Rol</label>
+                                            <select class="form-control @error('role') is-invalid @enderror" id="role" name="role" required>
+                                                <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Usuario</option>
+                                                <option value="coordinador" {{ old('role') == 'coordinador' ? 'selected' : '' }}>Coordinador</option>
+                                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrador</option>
+                                            </select>
+                                            @error('role')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                                </form>
                             </div>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
-                        @if ($rol === 'admin')
-                        <a href="{{ route('usuariosSigned') }}?token={{ $token }}" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                    </svg>
-                                </div>
-
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Usuarios</h2>
-
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    En este apartado podrás ver los usuarios
-                                </p>
-                            </div>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
-                        @endif
+                        </div>
                     </div>
                     </div>
                 </div>
