@@ -51,6 +51,8 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::get('/correos', [AuthController::class, 'showCorreoForm'])->name('correos');
+Route::post('/enviarCorreo', [AuthController::class,'enviarCorreo'])->name('enviarCorreo');
 
 Route::post('/', [AuthController::class, 'login']);
 

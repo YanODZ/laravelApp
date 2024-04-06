@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Login</title>
+    <title>Generar Código Correo</title>
 
     <!-- Add Bootstrap CDN link -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
@@ -15,11 +15,12 @@
 
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-10 col-sm-10 mt-1">
+        <div class="col-md-10 col-lg-10 col-sm-10 mt-2">
             <div class="card">
-                <div class="card-header">{{ __('Login') }}</div>
+                <div class="card-header">{{ __('Generar Correo') }}</div>
+                
                 <div class="card-body">
-                    <form id="loginForm" method="POST" action="{{ route('login') }}">
+                    <form id="registerForm" method="POST" action="{{ route('enviarCorreo') }}">
                         @csrf
 
                         <div class="form-group row">
@@ -50,25 +51,11 @@
                             </div>
                         </div>
 
-                        <div class="form-group row">
-                            <label for="google2fa_code" class="col-md-4 col-form-label text-md-right">{{ __('Tengo un código') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="google2fa_code" type="text" class="form-control @error('google2fa_code') is-invalid @enderror" name="google2fa_code" maxlength="6" autofocus onpaste="return false;">
-
-                                @error('google2fa_code')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
                         <div class="form-group row mb-0">
                             <div class="col-md-8 offset-md-4">
                             <div class="g-recaptcha" name="captchaInput" data-sitekey="{{ env('APP_RECAPTCHA_SITE_KEY') }}"></div>
                                 <button type="submit" class="btn btn-primary">
-                                    {{ __('Login') }}
+                                    {{ __('Enviar Correo') }}
                                 </button>
 
                                 @if (Route::has('password.request'))
@@ -81,16 +68,8 @@
 
                         <div class="form-group row mb-0">
                             <div class="col-md-8 offset-md-4">
-                                <a class="btn btn-link" href="{{ route('register') }}">
-                                    {{ __('No tienes una cuenta? Registrate') }}
-                                </a>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="form-group row mb-0">
-                            <div class="col-md-8 offset-md-4">
-                                <a class="btn btn-link" href="{{ route('correos') }}">
-                                    {{ __('Generar Correo') }}
+                                <a class="btn btn-link" href="{{ route('login') }}">
+                                    {{ __('Volver al Login') }}
                                 </a>
                             </div>
                         </div>
@@ -114,6 +93,7 @@
         </div>
     </div>
 </div>
+<!-- Reemplaza la versión slim con la versión completa de jQuery -->
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>

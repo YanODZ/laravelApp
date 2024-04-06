@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 
+use App\Mail\ExampleMail;
+use Illuminate\Support\Facades\Mail;
+
 class AuthController extends Controller
 {
     public function showLoginForm()
@@ -25,6 +28,10 @@ class AuthController extends Controller
 
     public function showRegisterForm(){
         return view('register');
+    }
+
+    public function showCorreoForm(){
+        return view('correo');
     }
 
     public function login(Request $request)
@@ -72,9 +79,23 @@ class AuthController extends Controller
                     Log::info('Intento de sesión con código: ' . $user->correo . ' IP:' . $request->getClientIp());
                     return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos incorrecto o usado ']);
                 }
+            }else{
+                if (!$request->google2fa_code) {
+                    Log::info('Intento de sesión sin código: ' . $user->correo . ' IP:' . $request->getClientIp());
+                    return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos requerido']);
+                }
+                $encryptedSecret = $user->code;
+                $decryptedSecret = Crypt::decryptString($encryptedSecret);
+                if ($decryptedSecret != $request->input('google2fa_code') || $user->code_used == 1) {
+                    Log::info('Intento de sesión con código: ' . $user->correo . ' IP:' . $request->getClientIp());
+                    return redirect()->route('login')->with(['auth' => 'Código de autenticación en dos pasos incorrecto o usado ']);
+                }
             }
 
             if($user->isAdmin()){
+                $user->code_used = true;
+                $user->save();
+            }else{
                 $user->code_used = true;
                 $user->save();
             }
@@ -197,4 +218,57 @@ class AuthController extends Controller
             return response()->json(['error' => 'Error al generar el código'], 500);
         }
     }
+
+    public function enviarCorreo(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'correo' => 'required',
+                'g-recaptcha-response' => 'required',
+                'contraseña' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])/',
+                ],
+            ]);
+
+            if ($validator->fails()) {
+                // Manejar los errores de validación aquí
+                return redirect()->route('correos')->with(['auth' => implode(' ', $validator->errors()->all())]);
+            }
+
+            $credentials = $request->only('correo', 'contraseña');
+
+            $user = User::where('correo', $credentials['correo'])->first();
+
+            if (!$user) {
+                // El usuario no existe, redirigir con el mensaje correspondiente
+                return redirect()->route('correos')->with(['auth' => 'Verifica tus credenciales']);
+            }
+
+            if($user->isAdmin()){
+                return redirect()->route('correos')->with(['auth' => 'No puedes generar correo para este usuario!']);
+            }
+
+            if (!$user || !Hash::check($credentials['contraseña'], $user->contraseña)) {
+                // Credenciales inválidas, redirigir de vuelta al login
+                return redirect()->route('correos')->with(['auth' => 'Verifica tus credenciales']);
+            }
+
+            $code = mt_rand(100000, 999999);
+            $encryptedCode = Crypt::encryptString($code);
+            $user->code = $encryptedCode;
+            $user->code_used = false;
+            $user->save();
+            Mail::to($user->correo)->send(new ExampleMail($user->nombre, $code));
+
+            // Redirigir a alguna ruta después de enviar el correo
+            return redirect()->route('login')->with(['message' => 'Correo enviado']);
+        } catch (\Exception $e) {
+            // Manejar cualquier error inesperado aquí
+            return redirect()->route('correos')->with(['auth' => 'Ha ocurrido un error. Por favor, inténtalo de nuevo.']);
+        }
+    }
+
 }

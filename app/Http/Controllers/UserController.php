@@ -164,6 +164,8 @@ class UserController extends Controller
                         $secret = $google2fa->generateSecretKey();
                         $encryptedSecret = Crypt::encryptString($secret);
                         $user->google2fa_secret = $encryptedSecret;
+                        $user->code = null;
+                        $user->code_used = false;
                         $user->save();
                     }else{
                         $secret = null;
