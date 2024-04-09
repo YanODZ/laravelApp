@@ -99,8 +99,17 @@ class AuthController extends Controller
                 $user->code_used = true;
                 $user->save();
             }
-            
+            if($user->token != null){
+                $decryptedToken = Crypt::decryptString($user->token);
+                if (JWTAuth::setToken($decryptedToken)->check()) {
+                    // El token no está expirado, podemos invalidarlo
+                    JWTAuth::setToken($decryptedToken)->invalidate();
+                }
+            }
+            $user->token = null;
             $token = JWTAuth::fromUser($user);
+            $user->token = Crypt::encryptString($token);
+            $user->save();
             Log::info('Usuario ha iniciado sesión: ' . $user->correo . ' IP:' . $request->getClientIp());
             return $this->respondWithToken($token, $user->role);
     
@@ -122,6 +131,8 @@ class AuthController extends Controller
         try {
             $token = JWTAuth::getToken();
             $user = JWTAuth::setToken($token)->authenticate();
+            $user->token = null;
+            $user->save();
             Log::info('Usuario ha cerrado sesión:' . $user->correo . ' IP:' . $request->getClientIp());
             JWTAuth::parseToken()->invalidate();
             return redirect()->route('login')->with('message', 'Sesión cerrada correctamente');

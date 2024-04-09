@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('correo');
             $table->string('contraseña');
             $table->string('role');
+            $table->text('token')->nullable();
         });
     }
 

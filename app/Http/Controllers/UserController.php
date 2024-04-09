@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
@@ -175,6 +176,15 @@ class UserController extends Controller
                     $user->google2fa_secret = null;
                     $user->code = null;
                     $user->code_used = false;
+                    $user->save();
+                }
+                if($user->token != null){
+                    $decryptedToken = Crypt::decryptString($user->token);
+                    if (JWTAuth::setToken($decryptedToken)->check()) {
+                        // El token no está expirado, podemos invalidarlo
+                        JWTAuth::setToken($decryptedToken)->invalidate();
+                    }
+                    $user->token = null;
                     $user->save();
                 }
                 return redirect()->route('usuariosSigned', ['token' => $token])->with(['message' => 'Usuario actualizado correctamente', 'factor' => $secret,]);
