@@ -61,6 +61,17 @@ class AuthController extends Controller
                 Log::info('Intento de sesión no válido: ' . $request->correo . ' IP:' . $request->getClientIp());
                 return redirect()->route('login')->with(['auth' => 'Verifica tus credencialess']);
             }
+
+            //CAMBIO
+            if($user->role === "user"){
+                $allowedIPsCheck = explode(',', env('ADMIN_ALLOWED_IPS'));
+                $clientIPCheck = $request->getClientIp();
+                if (in_array($clientIPCheck, $allowedIPsCheck)) {
+                    Log::info('Intento de sesión de invitado desde una IP no autorizada: ' . $user->correo . ' IP:' . $clientIP);
+                    return redirect()->route('login')->with(['auth' => 'No puedes acceder como invitado desde aquí']);
+                }
+            }
+            //CAMBIO
     
             if ($user->isAdmin()) {
                 $allowedIPs = explode(',', env('ADMIN_ALLOWED_IPS'));
