@@ -63,7 +63,7 @@ class AuthController extends Controller
             }
 
             //CAMBIO
-            if($user->role === "user"){
+            if($user->role == "user"){
                 $allowedIPsCheck = explode(',', env('ADMIN_ALLOWED_IPS'));
                 $clientIPCheck = $request->getClientIp();
                 if (in_array($clientIPCheck, $allowedIPsCheck)) {
