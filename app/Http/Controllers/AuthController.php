@@ -63,11 +63,11 @@ class AuthController extends Controller
             }
 
             //CAMBIO
-            if($user->role == "user"){
+            if($user->role === "user"){
                 $allowedIPsCheck = explode(',', env('ADMIN_ALLOWED_IPS'));
                 $clientIPCheck = $request->getClientIp();
                 if (in_array($clientIPCheck, $allowedIPsCheck)) {
-                    Log::info('Intento de sesión de invitado desde una IP no autorizada: ' . $user->correo . ' IP:' . $clientIP);
+                    Log::info('Intento de sesión de invitado desde una IP no autorizada: ' . $user->correo . ' IP:' . $clientIPCheck);
                     return redirect()->route('login')->with(['auth' => 'No puedes acceder como invitado desde aquí']);
                 }
             }
